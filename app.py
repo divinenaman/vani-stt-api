@@ -2,6 +2,7 @@ import speech_recognition as sr
 import base64
 from flask import Flask
 from flask import request, jsonify
+import os
 
 app = Flask(__name__)
 r = sr.Recognizer()
@@ -24,5 +25,6 @@ def hello_world():
             return jsonify({"text":text})
         except:
             return jsonify({"err": "something went wrong"})
-                
-app.run(debug=True)    
+
+port = int(os.environ.get('PORT', 5000))                
+app.run(debug=True,port=port)    
