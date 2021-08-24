@@ -1,18 +1,18 @@
 import speech_recognition as sr
+from fastapi import FastAPI
+from pydantic import BaseModel
 import base64
-from flask import Flask
-from flask import request, jsonify
 import os
 
-app = Flask(__name__)
+app = FastAPI()
 r = sr.Recognizer()
 
+class Audio(BaseModel):
+    audio: str
 
-@app.route("/api/stt",methods=["POST"])
-def hello_world():
-    body = request.get_json()
-    audio_base64 = body.get('audio')
-    audio_wav = base64.b64decode(audio_base64)
+@app.post("/api/stt")
+def process_audio(audio: Audio):
+    audio_wav = base64.b64decode(audio.audio)
     
     wav_file = open("temp.wav", "wb")
     wav_file.write(audio_wav)
@@ -22,9 +22,6 @@ def hello_world():
             audio_text = r.listen(source)    
             text = r.recognize_google(audio_text,language = "en-IN")
             #print(text)
-            return jsonify({"text":text})
+            return {"text":text}
         except:
-            return jsonify({"err": "something went wrong"})
-
-port = int(os.environ.get('PORT', 5000))                
-app.run(debug=True,port=port)    
+            return {"err": "something went wrong"}
